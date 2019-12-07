@@ -1,18 +1,18 @@
-##Pallet Purchase Web app
+## Pallet Purchase Web app
 
 >This is made as the final project of [CS50's Introduction do Computer Science](https://www.edx.org/course/cs50s-introduction-to-computer-science) course
 
-###Introduction
+### Introduction
 
 I've worked in two companies that were dedicated to buy, fix if needed and then sell wood pallets to other companies. In both companies my job consisted, among other things, in writing in a receipt the type of pallet that were purchased and its quantity as well as the client information and the total value of the purchase. At the end of the day, my superior would grab all those receipts and sum the total and write it in a Excel spreadsheet to keep a control of how much money were spent with pallets each day.
 
 That's why I've decided to create this web app. To keep a record on every purchase and the view these by day, month and year, and to automatically export the data to a spreadsheet.
 
-###Implementation
+### Implementation
 
 To keep things simple, I've decide to use the tools that were used in the Finance project in the week 8. So I created a virtual environment and installed Flask, to run the backend and the cs50's package, in order to use the database.
 
-#####Website
+##### Website
 
 The website will have seven pages with two functions: store the purchases in a database and view the data. To prevent unwanted people accessing and modifying the database, the user must be logged. There will not be an option to create a user in the website, all accounts must be created by the admin. On top of every page (except the index page and the confirmation page) there will be a navbar so the user can access every page easily.
 
@@ -37,7 +37,7 @@ The website will have seven pages with two functions: store the purchases in a d
 * __Confirmation Page__
  This page will look very similar to the Detailed View page. The only difference is that at the end of the page will have a confirmation button so the purchase can be recorded on the database. After the user confirms the purchase, he or she will be redirected to the daily view of the current day.
 
-#####Database
+##### Database
 
 The database should have the following tables:
 
