@@ -12,7 +12,7 @@ That's why I've decided to create this web app. To keep a record on every purcha
 
 To keep things simple, I've decide to use the tools that were used in the Finance project in the week 8. So I created a virtual environment and installed Flask, to run the backend and the cs50's package, in order to use the database.
 
-##### Website
+#### Website
 
 The website will have seven pages with two functions: store the purchases in a database and view the data. To prevent unwanted people accessing and modifying the database, the user must be logged. There will not be an option to create a user in the website, all accounts must be created by the admin. On top of every page (except the index page and the confirmation page) there will be a navbar so the user can access every page easily.
 
@@ -37,26 +37,26 @@ The website will have seven pages with two functions: store the purchases in a d
 * __Confirmation Page__
  This page will look very similar to the Detailed View page. The only difference is that at the end of the page will have a confirmation button so the purchase can be recorded on the database. After the user confirms the purchase, he or she will be redirected to the daily view of the current day.
 
-##### Database
+#### Database
 
 The database should have the following tables:
 
-* __Users__
- This table will store the users information.
- * user_id - Integer, primary key, autoincrement.
- * username - Varchar(64), non nullable.
- * pass_hash - Varchar(255), non nullable.
+* __Users__  
+ This table will store the users information.  
+ * user_id - Integer, primary key, autoincrement.  
+ * username - Varchar(64), non nullable.  
+ * pass_hash - Varchar(255), non nullable.  
 
-* __Purchases__
- This table will store all the purchases information.
- * purchase_id - Integer, primary key, autoincrement.
- * user - Integer, non nullable, foreign key references Users.
- * date - timestamp, non nullable, default=CURRENT_TIMESTAMP.
- * customer - Varchar(255), non nullable.
+* __Purchases__  
+ This table will store all the purchases information.  
+ * purchase_id - Integer, primary key, autoincrement.  
+ * user - Integer, non nullable, foreign key references Users.  
+ * date - timestamp, non nullable, default=CURRENT_TIMESTAMP.  
+ * customer - Varchar(255), non nullable.  
 
-* __Pallets_In_Purchases__
- This table will store what type of pallet were bought in each purchase.
- * purchase_id - Integer, non nullable, foreign key references Purchases.
- * type - Varchar(64), non nullable.
- * quantity - Integer, non nullable.
+* __Pallets_In_Purchases__  
+ This table will store what type of pallet were bought in each purchase.  
+ * purchase_id - Integer, non nullable, foreign key references Purchases.  
+ * type - Varchar(64), non nullable.  
+ * quantity - Integer, non nullable.  
  * unitary_price - Real, non nullable
