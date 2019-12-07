@@ -1,32 +1,30 @@
-from flask import Flask, redirect, render_template, request, session, url_for
+from cs50 import SQL
+from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from helper import login_required
 
+# Configure application
 app = Flask(__name__)
 
+# Configure session
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pallets.db"
-db = SQLAlchemy(app)
-
-class Users(db.Model):
-    user_id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), nullable=False, unique=True)
-    password = db.Column(db.String(255), nullable=False)
-
-    def __repr__(self):
-        return "<User %r>" % self.user_id
-
-
+# Configure CS50 Library to use SQLite database
+db = SQL("sqlite:///pallets.db")
 
 @app.route('/', methods=["GET", "POST"])
 def index():
+    """Log the user in"""
+
+    # User reached route via GET
     if request.method == "GET":
         return render_template("index.html")
+
+    # User reached route via POST
     else:
         session["user"] = request.form.get("username")
         return redirect("/daily_view")
