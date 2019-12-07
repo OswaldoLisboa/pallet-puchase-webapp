@@ -41,22 +41,22 @@ The website will have seven pages with two functions: store the purchases in a d
 
 The database should have the following tables:
 
-* __Users__  
- This table will store the users information.  
- * user_id - Integer, primary key, autoincrement.  
- * username - Varchar(64), non nullable.  
- * pass_hash - Varchar(255), non nullable.  
+* __Users__
+  This table will store the users information.  
+  * user_id - Integer, primary key, autoincrement.  
+  * username - Varchar(64), non nullable.  
+  * pass_hash - Varchar(255), non nullable.  
 
-* __Purchases__  
- This table will store all the purchases information.  
- * purchase_id - Integer, primary key, autoincrement.  
- * user - Integer, non nullable, foreign key references Users.  
- * date - timestamp, non nullable, default=CURRENT_TIMESTAMP.  
- * customer - Varchar(255), non nullable.  
+* __Purchases__
+  This table will store all the purchases information.  
+  * purchase_id - Integer, primary key, autoincrement.  
+  * user - Integer, non nullable, foreign key references Users.  
+  * date - timestamp, non nullable, default=CURRENT_TIMESTAMP.  
+  * customer - Varchar(255), non nullable.  
 
-* __Pallets_In_Purchases__  
- This table will store what type of pallet were bought in each purchase.  
- * purchase_id - Integer, non nullable, foreign key references Purchases.  
- * type - Varchar(64), non nullable.  
- * quantity - Integer, non nullable.  
- * unitary_price - Real, non nullable
+* __Pallets_In_Purchases__
+  This table will store what type of pallet were bought in each purchase.  
+  * purchase_id - Integer, non nullable, foreign key references Purchases.  
+  * type - Varchar(64), non nullable.  
+  * quantity - Integer, non nullable.  
+  * unitary_price - Real, non nullable
