@@ -1,17 +1,17 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Monthly View
+    Yearly View
 {% endblock %}
 
 {% block body %}
     <main class="container p-5">
-        <h6>SELECT ANOTHER MONTH</h6>
-        <form action="/monthly_view" method="post">
+        <h6>SELECT ANOTHER YEAR</h6>
+        <form action="/yearly_view" method="post">
             <div class="form-group">
-                <select name="month">
-                    {% for i in range(monLength) %}
-                        <option value="{{months[i]['Month']}}">{{months[i]['Month']}}</option>
+                <select name="year">
+                    {% for i in range(yeaLength) %}
+                        <option value="{{years[i]['Year']}}">{{years[i]['Year']}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -19,7 +19,7 @@
         </form>
         <br>
         {% if summary == [] %}
-            <h3>There are not purchases in this month</h3>
+            <h3>There are not purchases in this year</h3>
         {% else %}
             <b>Purchases</b>: {{summary[0]["Purchases"]}}<br>
             <b>Pallets Bought</b>: {{summary[0]["Pallets"]}}<br>
@@ -28,15 +28,15 @@
                 <th>
                     <tr>
                         <td><b>Link</b></td>
-                        <td><b>Date</b></td>
+                        <td><b>Month</b></td>
                         <td><b>Pallets</b></td>
                         <td><b>Total (€)</b></td>
                     </tr>
                 </th>
                 {% for i in range(detLength) %}
                     <tr>
-                        <td><a href="/daily_view?date={{details[i]['Date']}}">Details</a></td>
-                        <td>{{details[i]["Date"]}}</td>
+                        <td><a href="/monthly_view?month={{details[i]['Month']}}">Details</a></td>
+                        <td>{{details[i]["Month"]}}</td>
                         <td>{{details[i]["Pallets"]}}</td>
                         <td>{{details[i]["Total"]}}</td>
                     </tr>

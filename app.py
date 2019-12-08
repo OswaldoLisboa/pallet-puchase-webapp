@@ -67,7 +67,10 @@ def daily_view():
 
     # User reached route via GET
     if request.method == "GET":
-        reqDate=date.today()
+        if request.args.get("date"):
+            reqDate = request.args.get("date")
+        else:
+            reqDate=date.today()
 
     # User reached route via POST
     else:
@@ -138,23 +141,26 @@ def detailed_view():
 @app.route('/monthly_view', methods=["GET", "POST"])
 @login_required
 def monthly_view():
-    """ Show all the purchases of a month """
+    """ Show a summary of every day in a month """
 
     # User reached route via GET
     if request.method == "GET":
-        reqMonth=date.today().strftime("%Y-%m")
+        if request.args.get("month"):
+            reqMonth = request.args.get("month")
+        else:
+            reqMonth=date.today().strftime("%Y-%m")
 
     # User reached route via POST
     else:
         reqMonth=request.form.get("month")
 
-    # Query the database for all the days that had purchases
+    # Query the database for all the months that had purchases
     months = db.execute("""SELECT strftime('%Y-%m', date) AS Month
                        FROM purchases
                        GROUP BY strftime('%Y-%m',date)
                        ORDER BY strftime('%Y-%m',date) DESC""")
 
-    # Query the database for the summary of purchases in a day
+    # Query the database for the summary of purchases in a month
     summary = db.execute("""SELECT (SELECT COUNT(purchases.purchase_id)
                             	FROM purchases
                                 WHERE strftime('%Y-%m', purchases.date) = :month) AS Purchases,
@@ -165,7 +171,7 @@ def monthly_view():
                         	AND strftime('%Y-%m', purchases.date) = :month
                         GROUP BY strftime('%Y-%m', purchases.date);""", month=reqMonth)
 
-    # Query the database for all the purchases in a day
+    # Query the database for the sum of all the purchases in a month
     details = db.execute("""SELECT date(purchases.date) AS Date,
                             SUM(pallets_in_purchase.quantity) AS Pallets,
                             SUM(pallets_in_purchase.unitary_price * pallets_in_purchase.quantity) AS Total
@@ -183,8 +189,46 @@ def monthly_view():
 @app.route('/yearly_view', methods=["GET", "POST"])
 @login_required
 def yearly_view():
-    """ TODO """
-    return("TODO")
+    """ Show a summary of every month in a year """
+
+    # User reached route via GET
+    if request.method == "GET":
+        reqYear=date.today().strftime("%Y")
+
+    # User reached route via POST
+    else:
+        reqYear=request.form.get("year")
+
+    # Query the database for all the years that had purchases
+    years = db.execute("""SELECT strftime('%Y', date) AS Year
+                       FROM purchases
+                       GROUP BY strftime('%Y',date)
+                       ORDER BY strftime('%Y',date) DESC""")
+
+    # Query the database for the summary of purchases in a year
+    summary = db.execute("""SELECT (SELECT COUNT(purchases.purchase_id)
+                            	FROM purchases
+                                WHERE strftime('%Y', purchases.date) = :year) AS Purchases,
+                        	SUM(pallets_in_purchase.quantity) AS Pallets,
+                        	SUM(quantity *  unitary_price) AS Spent
+                        FROM purchases, pallets_in_purchase
+                        WHERE purchases.purchase_id = pallets_in_purchase.purchase_id
+                        	AND strftime('%Y', purchases.date) = :year
+                        GROUP BY strftime('%Y', purchases.date);""", year=reqYear)
+
+    # Query the database for the sum of all the purchases in a year
+    details = db.execute("""SELECT strftime('%Y-%m', purchases.date) AS Month,
+                            SUM(pallets_in_purchase.quantity) AS Pallets,
+                            SUM(pallets_in_purchase.unitary_price * pallets_in_purchase.quantity) AS Total
+                        FROM purchases, pallets_in_purchase, users
+                        WHERE purchases.purchase_id = pallets_in_purchase.purchase_id
+                            AND purchases.user = users.user_id
+                            AND strftime('%Y', purchases.date) = :year
+                        GROUP BY strftime('%Y-%m', purchases.date)
+                        ORDER BY strftime('%Y-%m', purchases.date);""", year=reqYear)
+    # Render the page
+    return render_template("yearly_view.html", years=years, yeaLength=len(summary),
+                          summary=summary, details=details, detLength=len(details))
 
 @app.route('/buy', methods=["GET", "POST"])
 @login_required
