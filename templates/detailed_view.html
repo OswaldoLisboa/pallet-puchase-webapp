@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Detailed View
+{% endblock %}
+
+{% block body %}
+    <main class="container p-5">
+        <br>
+        {% if purchase == [] %}
+            <h3>There is not a purchase with this id</h3>
+        {% else %}
+            <b>Customer</b>: {{purchase[0]["Customer"]}}<br>
+            <b>Time</b>: {{purchase[0]["Time"]}}<br>
+            <b>Pallets Bought</b>: {{purchase[0]["Pallets"]}}<br>
+            <b>Total Spent</b>: {{purchase[0]["Spent"]}}€<br>
+            <b>User</b>: {{purchase[0]["User"]}}<br>
+            <table class="table">
+                <th>
+                    <tr>
+                        <td><b>Type</b></td>
+                        <td><b>Quantity</b></td>
+                        <td><b>Unitary Price (€)</b></td>
+                        <td><b>Total (€)</b></td>
+                    </tr>
+                </th>
+                {% for i in range(length) %}
+                    <tr>
+                        <td>{{pallets[i]["Type"]}}</td>
+                        <td>{{pallets[i]["Quantity"]}}</td>
+                        <td>{{pallets[i]["Unitary Price"]}}</td>
+                        <td>{{pallets[i]["Total"]}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </main>
+{% endblock %}

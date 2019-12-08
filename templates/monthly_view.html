@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Daily View
+{% endblock %}
+
+{% block body %}
+    <main class="container p-5">
+        <h6>SELECT ANOTHER MONTH</h6>
+        <form action="/monthly_view" method="post">
+            <div class="form-group">
+                <select name="month">
+                    {% for i in range(monLength) %}
+                        <option value="{{months[i]['Month']}}">{{months[i]['Month']}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+        <br>
+        {% if summary == [] %}
+            <h3>There are not purchases in this month</h3>
+        {% else %}
+            <b>Purchases</b>: {{summary[0]["Purchases"]}}<br>
+            <b>Pallets Bought</b>: {{summary[0]["Pallets"]}}<br>
+            <b>Total Spent</b>: {{summary[0]["Spent"]}}€<br>
+            <table class="table">
+                <th>
+                    <tr>
+                        <td><b>Link</b></td>
+                        <td><b>Date</b></td>
+                        <td><b>Pallets</b></td>
+                        <td><b>Total (€)</b></td>
+                    </tr>
+                </th>
+                {% for i in range(detLength) %}
+                    <tr>
+                        <td><a href="">Details</a></td>
+                        <td>{{details[i]["Date"]}}</td>
+                        <td>{{details[i]["Pallets"]}}</td>
+                        <td>{{details[i]["Total"]}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </main>
+{% endblock %}

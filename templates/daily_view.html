@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Daily View
+{% endblock %}
+
+{% block body %}
+    <main class="container p-5">
+        <h6>SELECT ANOTHER DAY</h6>
+        <form action="/daily_view" method="post">
+            <div class="form-group">
+                <select name="date">
+                    {% for i in range(datLength) %}
+                        <option value="{{dates[i]['Date']}}">{{dates[i]['Date']}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+        <br>
+        {% if summary == [] %}
+            <h3>There are not purchases in this day</h3>
+        {% else %}
+            <b>Purchases</b>: {{summary[0]["Purchases"]}}<br>
+            <b>Pallets Bought</b>: {{summary[0]["Pallets"]}}<br>
+            <b>Total Spent</b>: {{summary[0]["Spent"]}}€<br>
+            <table class="table">
+                <th>
+                    <tr>
+                        <td><b>Link</b></td>
+                        <td><b>Customer</b></td>
+                        <td><b>Pallets</b></td>
+                        <td><b>Total (€)</b></td>
+                        <td><b>User</b></td>
+                    </tr>
+                </th>
+                {% for i in range(detLength) %}
+                    <tr>
+                        <td><a href="/detailed_view?purchase_id={{details[i]['Id']}}">Details</a></td>
+                        <td>{{details[i]["Customer"]}}</td>
+                        <td>{{details[i]["Pallets"]}}</td>
+                        <td>{{details[i]["Total"]}}</td>
+                        <td>{{details[i]["User"]}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </main>
+{% endblock %}
