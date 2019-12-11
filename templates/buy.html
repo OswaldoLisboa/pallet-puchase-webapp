@@ -1,22 +1,24 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Login
+    Buy
 {% endblock %}
 
 {% block body %}
     <main class="container p-5">
-        <div id="login-form">
-            <h4>Buy</h4><br>
-            <form action="/" method="post">
+        <h4>Buy Pallets</h4><br>
+        <form action="/buy" method="post">
+            <div class="form-group">
+                <input type="text" class="form-control" name="customer" placeholder="Customer's Name">
+            </div>
+            {% for i in range(10) %}
                 <div class="form-group">
-                    <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
+                    <input type="text" class="form-control" name="type{{i}}" placeholder="Type of Pallet">
+                    <input type="number" class="form-control" name="quantity{{i}}" step="1" placeholder="Number of Pallets">
+                    <input type="number" class="form-control" name="price{{i}}" step="0.01" placeholder="Unitary Price">
                 </div>
-                <div class="form-group">
-                    <input class="form-control" name="password" placeholder="Password" type="password">
-                </div>
-                <button class="btn btn-primary" type="submit">Log In</button>
-            </form>
-        </div>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">Confirm Purchase</button>
+        </form>
     </main>
 {% endblock %}

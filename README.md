@@ -42,7 +42,7 @@ The website will have seven pages with two functions: store the purchases in a d
 
 * __Confirmation Page__
 
-  This page will look very similar to the Detailed View page. The only difference is that at the end of the page will have a confirmation button so the purchase can be recorded on the database. After the user confirms the purchase, he or she will be redirected to the daily view of the current day.
+  This page will show the details of the purchase just made: The customer, the total of pallets bough and the total spent. It will also show a table with every pallet purchased.
 
 #### Database
 

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Confirm Purchase
+{% endblock %}
+
+{% block body %}
+    <main class="container p-5">
+        <br>
+        <h2>Purchase Confirmed</h2>
+        <b>Customer</b>: {{purchase["Customer"]}}<br>
+        <b>Pallets Bought</b>: {{purchase["Pallets"]}}<br>
+        <b>Total Spent</b>: {{purchase["Spent"]}}€<br>
+        <table class="table">
+            <th>
+                <tr>
+                    <td><b>Type</b></td>
+                    <td><b>Quantity</b></td>
+                    <td><b>Unitary Price (€)</b></td>
+                    <td><b>Total (€)</b></td>
+                </tr>
+            </th>
+            {% for i in range(length) %}
+                <tr>
+                    <td>{{pallets[i]["Type"]}}</td>
+                    <td>{{pallets[i]["Quantity"]}}</td>
+                    <td>{{pallets[i]["Unitary Price"]}}</td>
+                    <td>{{pallets[i]["Total"]}}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </main>
+{% endblock %}

@@ -2,7 +2,7 @@ from cs50 import SQL
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date
+from datetime import date, datetime
 
 from helper import login_required
 
@@ -24,7 +24,8 @@ def index():
     # User reached route via GET
     if request.method == "GET":
 
-        # Check if the user has already logged in
+        # Check if the user has already logged in, if positive the user
+        # will be redirected to the daily view page
         if session.get("user_id") is None:
             return render_template("index.html")
         return redirect("/daily_view")
@@ -36,7 +37,8 @@ def index():
         users = db.execute("SELECT * FROM users WHERE username = :username",
                           username=request.form.get("username"))
 
-        # There's no user with that username in the database or the password is incorrect
+        # There's no user with that username in the database
+        # or the password is incorrect
         if users == [] or not check_password_hash(users[0]["pass_hash"],
                                                  request.form.get("password")):
             # TODO
@@ -67,6 +69,9 @@ def daily_view():
 
     # User reached route via GET
     if request.method == "GET":
+
+        # Set the date based on if there's an url parameter, if positive,
+        # will use this date, otherwise, will use the current date
         if request.args.get("date"):
             reqDate = request.args.get("date")
         else:
@@ -74,15 +79,18 @@ def daily_view():
 
     # User reached route via POST
     else:
+        # Set the date based on the form
         reqDate=request.form.get("date")
 
     # Query the database for all the days that had purchases
+    # and store them in a variable
     dates = db.execute("""SELECT DATE(purchases.date) AS Date
                       FROM purchases
                       GROUP BY DATE(purchases.date)
                       ORDER BY DATE(purchases.date) DESC;""")
 
     # Query the database for the summary of purchases in a day
+    # and store it in a variable
     summary = db.execute("""SELECT
                             (SELECT count(purchases.purchase_id)
                             FROM purchases where date(purchases.date) = date(:date)) AS Purchases,
@@ -95,6 +103,7 @@ def daily_view():
                         ORDER BY pallets_in_purchase.purchase_id;""", date=reqDate)
 
     # Query the database for all the purchases in a day
+    # and store them in a variable
     details = db.execute("""SELECT purchases.purchase_id AS Id,
                             purchases.customer AS Customer,
                             SUM(pallets_in_purchase.quantity) AS Pallets,
@@ -109,7 +118,7 @@ def daily_view():
 
     # Render the page
     return render_template("daily_view.html", dates=dates, datLength=len(dates),
-                          summary=summary, details=details, detLength=len(details))
+                          summary=summary, details=details, detLength=len(details), reqDate=reqDate)
 
 @app.route('/detailed_view', methods=["GET"])
 @login_required
@@ -117,6 +126,7 @@ def detailed_view():
     """ Show the details of a puchase """
 
     # Query the database for the purchase details
+    # and store them in a variable
     purchase = db.execute("""SELECT purchases.customer AS Customer,
                             purchases.date AS Time,
                             SUM(pallets_in_purchase.quantity) AS Pallets,
@@ -127,7 +137,8 @@ def detailed_view():
                             AND purchases.user = users.user_id
                             AND purchases.purchase_id = :purchase_id;""", purchase_id=request.args.get("purchase_id"))
 
-    # Query the database for which pallets were bought
+    # Query the database to check which pallets were bought in this particular
+    # purchase and store them in a variable
     pallets = db.execute("""SELECT type as Type,
                             quantity AS Quantity,
                             unitary_price AS 'Unitary Price',
@@ -145,6 +156,8 @@ def monthly_view():
 
     # User reached route via GET
     if request.method == "GET":
+        # Set the month based on if there's an url parameter, if positive,
+        # will use this month, otherwise, will use the current month
         if request.args.get("month"):
             reqMonth = request.args.get("month")
         else:
@@ -152,15 +165,18 @@ def monthly_view():
 
     # User reached route via POST
     else:
+        # Set the month based on the form
         reqMonth=request.form.get("month")
 
     # Query the database for all the months that had purchases
+    # and store them in a variable
     months = db.execute("""SELECT strftime('%Y-%m', date) AS Month
                        FROM purchases
                        GROUP BY strftime('%Y-%m',date)
                        ORDER BY strftime('%Y-%m',date) DESC""")
 
     # Query the database for the summary of purchases in a month
+    # and store it in a variable
     summary = db.execute("""SELECT (SELECT COUNT(purchases.purchase_id)
                             	FROM purchases
                                 WHERE strftime('%Y-%m', purchases.date) = :month) AS Purchases,
@@ -172,6 +188,7 @@ def monthly_view():
                         GROUP BY strftime('%Y-%m', purchases.date);""", month=reqMonth)
 
     # Query the database for the sum of all the purchases in a month
+    # and store it in a variable
     details = db.execute("""SELECT date(purchases.date) AS Date,
                             SUM(pallets_in_purchase.quantity) AS Pallets,
                             SUM(pallets_in_purchase.unitary_price * pallets_in_purchase.quantity) AS Total
@@ -184,7 +201,7 @@ def monthly_view():
 
     # Render the page
     return render_template("monthly_view.html", months=months, monLength=len(summary),
-                          summary=summary, details=details, detLength=len(details))
+                          summary=summary, details=details, detLength=len(details), reqMonth=reqMonth)
 
 @app.route('/yearly_view', methods=["GET", "POST"])
 @login_required
@@ -193,19 +210,23 @@ def yearly_view():
 
     # User reached route via GET
     if request.method == "GET":
+        # Set the year to the current year
         reqYear=date.today().strftime("%Y")
 
     # User reached route via POST
     else:
+        # Set the year base on the form
         reqYear=request.form.get("year")
 
     # Query the database for all the years that had purchases
+    # and store them in a variable
     years = db.execute("""SELECT strftime('%Y', date) AS Year
                        FROM purchases
                        GROUP BY strftime('%Y',date)
                        ORDER BY strftime('%Y',date) DESC""")
 
     # Query the database for the summary of purchases in a year
+    # and store it in a variable
     summary = db.execute("""SELECT (SELECT COUNT(purchases.purchase_id)
                             	FROM purchases
                                 WHERE strftime('%Y', purchases.date) = :year) AS Purchases,
@@ -217,6 +238,7 @@ def yearly_view():
                         GROUP BY strftime('%Y', purchases.date);""", year=reqYear)
 
     # Query the database for the sum of all the purchases in a year
+    # and store it in a variable
     details = db.execute("""SELECT strftime('%Y-%m', purchases.date) AS Month,
                             SUM(pallets_in_purchase.quantity) AS Pallets,
                             SUM(pallets_in_purchase.unitary_price * pallets_in_purchase.quantity) AS Total
@@ -228,20 +250,65 @@ def yearly_view():
                         ORDER BY strftime('%Y-%m', purchases.date);""", year=reqYear)
     # Render the page
     return render_template("yearly_view.html", years=years, yeaLength=len(summary),
-                          summary=summary, details=details, detLength=len(details))
+                          summary=summary, details=details, detLength=len(details), reqYear=reqYear)
 
 @app.route('/buy', methods=["GET", "POST"])
 @login_required
 def buy():
-    """ TODO """
-    return render_template("buy.html")
+    """ Buy the pallets and display a table with the details of the purchase"""
 
-@app.route('/confirmation', methods=["GET"])
-@login_required
-def confirmation():
-    """ TODO """
-    return("TODO")
+    # User reached route via GET
+    if request.method == "GET":
 
+        # Render the page with the form to buy the pallets
+        return render_template("buy.html")
+
+    # User reached route via POST
+    else:
+
+        # Extract the data from the form
+        palletsPurchased, moneySpent = 0, 0
+        pallets = []
+        for i in range(10):
+            if (request.form.get("type"+str(i))
+                    and request.form.get("quantity"+str(i))
+                    and request.form.get("price"+str(i))):
+                pallet = {}
+                pallet["Type"] = request.form.get("type"+str(i))
+                pallet["Quantity"] = int(request.form.get("quantity"+str(i)))
+                pallet["Unitary Price"] = float(request.form.get("price"+str(i)))
+                pallet["Total"] = pallet["Quantity"] * pallet["Unitary Price"]
+                pallets.append(pallet)
+                palletsPurchased += pallet["Quantity"]
+                moneySpent += pallet["Quantity"] * pallet["Unitary Price"]
+        purchase = {}
+        purchase["Customer"] = request.form.get("customer")
+        purchase["Pallets"] = palletsPurchased
+        purchase["Spent"] = moneySpent
+
+        # Insert the purchase summary into the database
+        db.execute("""INSERT INTO purchases ('user', 'date', 'customer')
+                   VALUES (:user, :date, :customer)""",
+                   user=session["user_id"],
+                   date=datetime.utcnow(),
+                   customer=purchase["Customer"])
+
+        # Check for the id of the most recent insertion in the purchases table
+        id = db.execute("""SELECT purchase_id AS Id
+                        FROM purchases
+                        WHERE purchase_id =
+                            (SELECT max(purchase_id) from purchases);""")[0]["Id"]
+
+        # Insert each pallet with it's correspondent quantity and price into
+        # the pallets_in_purchase table
+        for i in pallets:
+            db.execute("""INSERT INTO pallets_in_purchase
+                       VALUES (:id, :type, :quantity, :price)""",
+                       id=id, type=i["Type"],
+                       quantity=i["Quantity"], price=i["Unitary Price"])
+
+        # Render the page with the detail of the purchase
+        return render_template("confirmation.html", purchase=purchase, pallets=pallets, length=len(pallets))
 
 if __name__ == "__main__":
     app.run(debug=True)
