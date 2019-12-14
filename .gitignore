@@ -2,6 +2,5 @@ env
 __pycache__
 flask_session
 pallets.db
-tempQueries
 static/spreadsheets/*
 !static/spreadsheets/.gitkeep
