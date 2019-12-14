@@ -1,8 +1,9 @@
 from cs50 import SQL
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, request, session, send_from_directory
 from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime
+import xlsxwriter, os
 
 from helper import login_required
 
@@ -41,8 +42,7 @@ def index():
         # or the password is incorrect
         if users == [] or not check_password_hash(users[0]["pass_hash"],
                                                  request.form.get("password")):
-            # TODO
-            return("WRONG USER OR PASSWORD")
+            return("Wrong Username or Password")
 
         # Remember the user
         session["user_id"] = users[0]["user_id"]
@@ -251,6 +251,107 @@ def yearly_view():
     # Render the page
     return render_template("yearly_view.html", years=years, yeaLength=len(summary),
                           summary=summary, details=details, detLength=len(details), reqYear=reqYear)
+
+@app.route('/download', methods=["GET"])
+@login_required
+def download():
+    """ Download a spreadsheet file with the details of a day, month or year """
+
+    period = request.args.get("period")
+
+    # Create and/or open the spreadsheet
+    workbook = xlsxwriter.Workbook("static/spreadsheets/" + period +".xlsx")
+    worksheet = workbook.add_worksheet()
+    bold = workbook.add_format({'bold': True})
+
+    # If the period selected is day, it will show a summary of every purchase of the day
+    if request.args.get("type") == "day":
+
+        # Query the database for the details
+        details = db.execute("""SELECT purchases.date AS Date,
+                            purchases.customer AS Customer,
+                            SUM(pallets_in_purchase.quantity) AS Pallets,
+                            SUM(pallets_in_purchase.unitary_price * pallets_in_purchase.quantity) AS Total,
+                            users.username AS User
+                        FROM purchases, pallets_in_purchase, users
+                        WHERE purchases.purchase_id = pallets_in_purchase.purchase_id
+                            AND purchases.user = users.user_id
+                            AND date(purchases.date) = date(:date)
+                        GROUP BY date(purchases.purchase_id)
+                        ORDER BY purchases.date;""", date=period)
+
+        # Write the headers
+        worksheet.write("A1", "Date", bold)
+        worksheet.write("B1", "Customer", bold)
+        worksheet.write("C1", "Pallets", bold)
+        worksheet.write("D1", "Total", bold)
+        worksheet.write("E1", "User", bold)
+
+        # Write the actual details
+        for i in range(len(details)):
+            worksheet.write("A"+str(i+2), details[i]["Date"])
+            worksheet.write("B"+str(i+2), details[i]["Customer"])
+            worksheet.write("C"+str(i+2), details[i]["Pallets"])
+            worksheet.write("D"+str(i+2), details[i]["Total"])
+            worksheet.write("E"+str(i+2), details[i]["User"])
+
+    # If the period selected is month, it will show the total spent in every day of that month
+    elif request.args.get("type") == "month":
+
+        # Query the database for the details
+        details = db.execute("""SELECT date(purchases.date) AS Period,
+                        SUM(pallets_in_purchase.quantity) AS Pallets,
+                        SUM(pallets_in_purchase.unitary_price * pallets_in_purchase.quantity) AS Total
+                    FROM purchases, pallets_in_purchase, users
+                    WHERE purchases.purchase_id = pallets_in_purchase.purchase_id
+                        AND purchases.user = users.user_id
+                        AND strftime('%Y-%m', purchases.date) = :month
+                    GROUP BY date(purchases.date)
+                    ORDER BY purchases.date;""", month=period)
+
+        # Write the headers
+        worksheet.write("A1", "Date", bold)
+        worksheet.write("B1", "Pallets", bold)
+        worksheet.write("C1", "Total", bold)
+
+        # Write the actual details
+        for i in range(len(details)):
+            worksheet.write("A"+str(i+2), details[i]["Period"])
+            worksheet.write("B"+str(i+2), details[i]["Pallets"])
+            worksheet.write("C"+str(i+2), details[i]["Total"])
+
+    # If the period selected is year, it will show the total spent in every month of that year
+    elif request.args.get("type") == "year":
+
+        # Query the database for the details
+        details = db.execute("""SELECT strftime('%Y-%m', purchases.date) AS Period,
+                        SUM(pallets_in_purchase.quantity) AS Pallets,
+                        SUM(pallets_in_purchase.unitary_price * pallets_in_purchase.quantity) AS Total
+                    FROM purchases, pallets_in_purchase, users
+                    WHERE purchases.purchase_id = pallets_in_purchase.purchase_id
+                        AND purchases.user = users.user_id
+                        AND strftime('%Y', purchases.date) = :year
+                    GROUP BY strftime('%Y-%m', purchases.date)
+                    ORDER BY strftime('%Y-%m', purchases.date);""", year=period)
+
+        # Write the headers
+        worksheet.write("A1", "Month", bold)
+        worksheet.write("B1", "Pallets", bold)
+        worksheet.write("C1", "Total", bold)
+
+        # Write the actual details
+        for i in range(len(details)):
+            worksheet.write("A"+str(i+2), details[i]["Period"])
+            worksheet.write("B"+str(i+2), details[i]["Pallets"])
+            worksheet.write("C"+str(i+2), details[i]["Total"])
+
+    # Close the spreadsheet
+    workbook.close()
+
+    # Send the file to the user's device
+    spreadsheet_folder = os.path.join(app.root_path, "static/spreadsheets/")
+    filename = period +".xlsx"
+    return send_from_directory(directory=spreadsheet_folder, filename=filename, as_attachment=True)
 
 @app.route('/buy', methods=["GET", "POST"])
 @login_required
