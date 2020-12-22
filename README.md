@@ -6,7 +6,7 @@
 
 I've worked in two companies that were dedicated to buy, fix if needed and then sell wood pallets to other companies. In both companies my job consisted, among other things, in writing in a receipt the type of pallet that were purchased and its quantity as well as the client information and the total value of the purchase. At the end of the day, my superior would grab all those receipts and sum the total and write it in a Excel spreadsheet to keep a control of how much money were spent with pallets each day.
 
-That's why I've decided to create this web app. To keep a record on every purchase and the view these by day, month and year, and to automatically export the data to a spreadsheet.
+That's why I've decided to create this web app. To keep a record on every purchase and to view these by day, month and year, and to automatically export the data to a spreadsheet.
 
 ### Implementation
 
